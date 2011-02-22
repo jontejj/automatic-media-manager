@@ -8,7 +8,7 @@ define("REDOWNLOAD_TORRENT_FILE",5);
 class RssHandler
 {
 	private $ignoredReleases = array('BoxSet','Quadrilogy','Quadrology','Trilogy','Duology','Hexalogy','Collection','Nuked','Movie pack','PACK','PS3','X360',
-										'FRENCH', 'GERMAN');
+										'FRENCH', 'GERMAN','German','WEBSCR');
 	private $seperators = array('.','-',',','_','[',']',' ','(',')');
 	/**
 	 * TvTorrents Rss filter

@@ -53,6 +53,8 @@ class Gui
 	
 	var $manuallyAdd;
 	
+	var $imdb;
+	
 	function __construct()
 	{
 		if(isset($_GET['page']))
@@ -140,7 +142,10 @@ class Gui
 		else 
 			$this->manuallyAdd = false;	
 			
-			
+		if(isset($_GET['imdb']))
+			$this->imdb = $_GET['imdb'];
+		else 
+			$this->imdb = 0;
 			
 		if(isset($_GET['screenWidth']))
 			$_SESSION['xbmc2web.screenWidth'] = $_GET['screenWidth'];
@@ -198,10 +203,17 @@ class Gui
 		else
 			$this->order = 'ASC';
 		
-		if($this->title != 0)
+		if($this->title != 0 || $this->imdb != 0)
 		{
 			global $dbh;
-			$this->production = $dbh->getProduction($this->title);
+			if($this->title != 0)
+				$this->production = $dbh->getProduction($this->title);
+			else 
+			{
+				$this->production = $dbh->getProductionByIMDB($this->imdb, false);
+				$this->title = $this->production->id;
+			}
+				
 			if($this->production === false)
 				die('Movie was not found');
 			
@@ -265,12 +277,12 @@ class Gui
 		if($this->studio) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&studio='.$this->studio.'">'.ucfirst($dbh->getStudio($this->studio)).'</a>';
 		if($this->role) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&role='.$this->role.'">'.$this->role.'</a>';
 		if($this->country) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&country='.$this->country.'">'.ucfirst($dbh->getcountry($this->country)).'</a>';
-		if($this->country && $this->title)
+		if($this->country && $this->production)
 		{
-			$title = $dbh->getCountryTitle($this->country,$this->title);
+			$title = $dbh->getCountryTitle($this->country,$this->production->id);
 			$this->out .= $this->headerSeperator.ucfirst($title[0]).' ('.ucfirst($title[1]).')';
 		}
-		else if($this->title) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&title='.$this->title.'">'.ucfirst($dbh->getTitle($this->title)).'</a>';
+		else if($this->production) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&title='.$this->title.'">'.ucfirst($dbh->getTitle($this->production->id)).'</a>';
 		if($this->season) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&title='.$this->title.'&season='.$this->season.'">Season '.$this->season.'</a>';
 		if($this->episode) $this->out .= $this->headerSeperator.'<a href="?page='.$this->page.'&sub='.$this->sub.'&title='.$this->title.'&season='.$this->season.'&episode='.$this->episode.'">Episode '.$this->episode.'</a>';
 		$this->out .= '';
