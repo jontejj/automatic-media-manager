@@ -93,10 +93,10 @@ class Logger
 			Logger::appendStringToFile($rssMovie->toString(),Logger::$rssMoviesLogFileName);
 	}
 	
-	public static function logIgnoredRSSMovie($rssMovie)
+	public static function logIgnoredRSSMovie($rssMovie, $reason)
 	{
 		if(is_a($rssMovie,'RssMovie'))
-			Logger::appendStringToFile($rssMovie->toString(),Logger::$rssMoviesIgnoredLogFileName);
+			Logger::appendStringToFile($rssMovie->toString().", Reason: ".$reason,Logger::$rssMoviesIgnoredLogFileName);
 	}
 	
 	public static function logNotAllowedRSSMovie($string)

@@ -5,6 +5,11 @@ require_once("includes.php");
 $dbh = new DatabaseHandler();
 $gui = new Gui();
 
+$prod = new Production();
+
+echo $prod->findIMDB("testfghfghfghf1imdb.com/title/tt728432439fdgfgfd", "Logging");
+die();
+
 //echo stripReleaseInfoFromTitle("Waiting... (2005)",true);
 //die();
 

@@ -4,17 +4,10 @@
     		return false;
         if($array && is_array($array))
         {
-            if($start != 0)
+            for($i = $start, $k = count($array); $i < $k; $i++)
             {
-                foreach($array as $linenum => $line) 
-                    if(strpos($line,$search) !== false && $linenum > $start) 
-                        return $linenum;    
-            }
-            else 
-            {
-	            foreach($array as $linenum => $line) 
-	            	if(strpos($line,$search) !== false) 
-	            		return $linenum;
+                    if(strpos($array[$i],$search) !== false) 
+                        return $i;
             }
         }
         return false;

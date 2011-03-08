@@ -132,8 +132,8 @@ class RssHandler
 									{
 										//Multiple IMDB links was found in NFO, this indicates a Trilogy or something, lets ignore those
 										$dbh->logFailedRssMovieLink($rssMovie->link);
-    									Logger::logIgnoredRSSMovie($rssMovie);
-    									continue;
+    									Logger::logIgnoredRSSMovie($rssMovie, "Multiple IMDB links found in NFO");
+    									break;
 									}
 									
 									if(!$rssMovie->tooBig)
@@ -374,7 +374,7 @@ class RssHandler
     		if($rssMovie->getImdbId($rssMovie->filenameExludingFileType) == MULTIPLE_MATCHES)
     		{
     			$dbh->logFailedRssMovieLink($rssMovie->link);
-    			Logger::logIgnoredRSSMovie($rssMovie);
+    			Logger::logIgnoredRSSMovie($rssMovie, "Multiple IMDB links found in NFO");
     			return;
     		}
     	}
@@ -438,7 +438,7 @@ class RssHandler
     			else if($dbh->getProductionIdForRssLink($rssMovie->link) === false)
     			{
     				$dbh->addLinkToRSSMovie($rssMovie->link,$movie);
-    				Logger::logIgnoredRSSMovie($rssMovie);
+    				Logger::logIgnoredRSSMovie($rssMovie, "Already had a movie with sufficient quality");
     				$rssMovie->addTorrentFilesToDb();
     			}
     		}

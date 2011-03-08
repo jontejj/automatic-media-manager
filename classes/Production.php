@@ -228,14 +228,25 @@ class Production {
 					$imdbId = StringUtil::scanint2(substr($object[$imdbLinkLineNumber],$imdbIdStart));
 					if(is_numeric($imdbId))
 					{
-						//Looks for multiple links
-						$imdbLinkLineNumber = returnarraykey($object,"imdb.com/title/tt", $imdbLinkLineNumber+1);
-						$imdbIdStart = strpos($object[$imdbLinkLineNumber],"imdb.com/title/tt", $imdbIdStart);
-						if($imdbIdStart !== false)
+						while(true)
 						{
-							Logger::echoText("Found Multiple IMDB links in NFO at: {$path}<br>");
-							return MULTIPLE_MATCHES;
-						}	
+							//Looks for multiple links
+							$imdbLinkLineNumber = returnarraykey($object,"imdb.com/title/tt", $imdbLinkLineNumber+1);
+							$imdbIdStart = strpos($object[$imdbLinkLineNumber],"imdb.com/title/tt", $imdbIdStart);
+							if($imdbIdStart !== false)
+							{
+								$imdbIdStart += 17;
+								$newImdbId = StringUtil::scanint2(substr($object[$imdbLinkLineNumber],$imdbIdStart));
+								if(is_numeric($newImdbId) && $newImdbId == $imdbId)
+								{
+									Logger::echoText("Found Multiple IMDB links (both {$imdbId} and {$newImdbId}) in NFO at: {$path}<br>");
+									return MULTIPLE_MATCHES;
+								}
+							}	
+							else 
+								break;
+						}
+
 						$this->imdb = $imdbId;
 						$this->nfoIMDB = $imdbId;
 						Logger::echoText("Found IMDB: {$this->imdb} in NFO at: {$path}<br>");
@@ -249,18 +260,27 @@ class Production {
         	{
              	$imdbIdStart = strpos($object,"imdb.com/title/tt");
              	if($imdbIdStart !== false)
-             	{
-					$imdbIdStart += 17;							
-					$imdbId = StringUtil::scanint2(substr($object,$imdbIdStart));
+             	{						
+					$imdbId = StringUtil::scanint2(substr($object,$imdbIdStart+17));
 					if(is_numeric($imdbId))
 					{
-						//Looks for multiple links
-						$imdbIdStart =  strpos($object,"imdb.com/title/tt", $imdbIdStart);
-						if($imdbIdStart !== false)
+						while(true)
 						{
-							Logger::echoText("Found Multiple IMDB links in NFO at: {$path}<br>");
-							return MULTIPLE_MATCHES;
-						}	
+							//Looks for multiple links
+							$imdbIdStart =  strpos($object,"imdb.com/title/tt", $imdbIdStart+17);
+							if($imdbIdStart !== false)
+							{
+								$imdbIdStart += 17;
+								$newImdbId = StringUtil::scanint2(substr($object,$imdbIdStart));
+								if(is_numeric($newImdbId) && $newImdbId == $imdbId)
+								{
+									Logger::echoText("Found Multiple IMDB links (both {$imdbId} and {$newImdbId}) in NFO at: {$path}<br>");
+									return MULTIPLE_MATCHES;
+								}
+							}	
+							else 
+								break;
+						}
 						$this->imdb = $imdbId;
 						$this->nfoIMDB = $imdbId;
 						Logger::echoText("Found IMDB: {$this->imdb} in NFO at: {$path}<br>");
