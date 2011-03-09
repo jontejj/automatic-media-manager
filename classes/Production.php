@@ -237,7 +237,7 @@ class Production {
 							{
 								$imdbIdStart += 17;
 								$newImdbId = StringUtil::scanint2(substr($object[$imdbLinkLineNumber],$imdbIdStart));
-								if(is_numeric($newImdbId) && $newImdbId == $imdbId)
+								if(is_numeric($newImdbId) && $newImdbId != $imdbId)
 								{
 									Logger::echoText("Found Multiple IMDB links (both {$imdbId} and {$newImdbId}) in NFO at: {$path}<br>");
 									return MULTIPLE_MATCHES;
@@ -272,7 +272,7 @@ class Production {
 							{
 								$imdbIdStart += 17;
 								$newImdbId = StringUtil::scanint2(substr($object,$imdbIdStart));
-								if(is_numeric($newImdbId) && $newImdbId == $imdbId)
+								if(is_numeric($newImdbId) && $newImdbId != $imdbId)
 								{
 									Logger::echoText("Found Multiple IMDB links (both {$imdbId} and {$newImdbId}) in NFO at: {$path}<br>");
 									return MULTIPLE_MATCHES;
