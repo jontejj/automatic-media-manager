@@ -121,7 +121,6 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         		$dvdfile = isVideoTsFolder($this->path.$this->filename);
         		if($dvdfile !== false)
 	            	$fileToLookAt .= $dvdfile;
-	            	
 	            exec(realpath(getcwd()."/functions/mediainfo/mediainfo.exe").' "'.$fileToLookAt.'"',$output); 
 	            $info = array();
 	            foreach($output as $line)
@@ -160,7 +159,6 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	            	$this->format = $info[$formatline];
 	            else 
 	            	$this->format = "";
-	            
 	            //Filesize
 	            $filesizeline = returnarraykey($output,'File size');
 	            if($filesizeline !== false)
@@ -171,22 +169,24 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 		                $this->filesize /= 1024;
 		            $this->filesize = round($this->filesize,2);
 	            }
-	            
 	            //Video bitrate
-	            $videobitrateline = returnarraykey($output,'Bit rate',returnarraykey($output,'Video'));
-	            if($videobitrateline !== false)
+	            $videoOffset = returnarraykey($output,'Video');
+	            if($videoOffset !== false)
 	            {
-	            	$line = $info[$videobitrateline];
-		            if(strpos($line,'Kbps') !== false)
+	            	$videobitrateline = returnarraykey($output,'Bit rate',$videoOffset);
+		            if($videobitrateline !== false)
 		            {
-		                $line = str_replace(array("Kbps"," "),'',$line);
-		                $this->videobitrate = $line/1024;    
+		            	$line = $info[$videobitrateline];
+			            if(strpos($line,'Kbps') !== false)
+			            {
+			                $line = str_replace(array("Kbps"," "),'',$line);
+			                $this->videobitrate = $line/1024;    
+			            }
+			            else
+			                $this->videobitrate = substr($line,0,strpos($line,' '));
+			            $this->videobitrate = round($this->videobitrate,2);           
 		            }
-		            else
-		                $this->videobitrate = substr($line,0,strpos($line,' '));
-		            $this->videobitrate = round($this->videobitrate,2);           
 	            }
-	            
 	            //Video width
 	            $widthline = returnarraykey($output,'Width');
 	            if($widthline !== false)
@@ -196,7 +196,6 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	            $heightline = returnarraykey($output,'Height');
 	            if($heightline !== false)
 	            	$this->height = str_replace(array("pixels"," "),'',$info[$heightline]);
-	
 	            //Aspect Ratio
 	            $arline = returnarraykey($output,'Display aspect ratio');
 	            if($arline !== false)
@@ -206,7 +205,6 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	            $wlline = returnarraykey($output,'Writing library');
 	            if($wlline !== false)
 	            	$this->writinglibrary = $info[$wlline];
-	
 	            //Audio tracks
 	            $multipleaudiotracks = returnarraykey($output,'Audio #');
 	            $multiple = false;
