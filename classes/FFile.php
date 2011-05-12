@@ -172,19 +172,23 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 		            $this->filesize = round($this->filesize,2);
 	            }
 	            
-	            //Video bitrate
-	            $videobitrateline = returnarraykey($output,'Bit rate',returnarraykey($output,'Video'));
-	            if($videobitrateline !== false)
+        		//Video bitrate
+	            $videoOffset = returnarraykey($output,'Video');
+	            if($videoOffset !== false)
 	            {
-	            	$line = $info[$videobitrateline];
-		            if(strpos($line,'Kbps') !== false)
+		            $videobitrateline = returnarraykey($output,'Bit rate',$videoOffset);
+		            if($videobitrateline !== false)
 		            {
-		                $line = str_replace(array("Kbps"," "),'',$line);
-		                $this->videobitrate = $line/1024;    
+		            	$line = $info[$videobitrateline];
+			            if(strpos($line,'Kbps') !== false)
+			            {
+			                $line = str_replace(array("Kbps"," "),'',$line);
+			                $this->videobitrate = $line/1024;    
+			            }
+			            else
+			                $this->videobitrate = substr($line,0,strpos($line,' '));
+			            $this->videobitrate = round($this->videobitrate,2);           
 		            }
-		            else
-		                $this->videobitrate = substr($line,0,strpos($line,' '));
-		            $this->videobitrate = round($this->videobitrate,2);           
 	            }
 	            
 	            //Video width
