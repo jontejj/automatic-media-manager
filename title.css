@@ -1,0 +1,138 @@
+#title
+{
+   z-index:1;  
+}
+#rolloverimagediv
+{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    display: block;
+    width: 200px;
+}
+
+body
+{
+	color: white;
+    font-family: Helvetica, sans-serif;
+  	width:95%; 
+  	background-size: 100%;
+  	background-repeat: no-repeat;
+  	background-position: center center;
+  	background-color: black;
+}
+
+.cornerside
+{
+	background-image: url('images/corners/side.png');
+	background-repeat:repeat-y;
+	width: 49px;
+}
+.cornertopunder
+{
+	background-image: url('images/corners/top_under.png');
+	background-repeat:repeat-x;
+	height: 50px;
+}
+
+.cornerimage
+{
+	width: 50px;
+	height: 50px;
+}
+
+.transparent
+{
+	background-image: url('images/corners/pixel.png');
+}
+
+#titlePosterColumn
+{
+	width: 30%;
+}
+
+#titlePosterTable
+{
+	width: 100%;
+}
+
+#titleMainInfoColumn
+{
+	padding-left: 2%;
+	width: 63%;
+}
+#titleIconColumn
+{
+	padding-top:10px;
+	width: 7%;
+}
+
+#cornerTable
+{
+	width: 90%;
+	margin: 5%;
+}
+
+.posterthumb
+{
+	width: 8%;
+}
+
+#titlenameheader
+{
+	margin-bottom:0%;	
+}
+
+.basicInfo h3
+{
+	color: white;
+	text-shadow: black 1px 1px 5px;
+	font-variant: small-caps;
+	font-style: bold;
+	padding-right: 50px;
+	margin-bottom: 3px;
+	margin-top: 0px;
+}
+
+.personphoto
+{
+	padding-left: 20px;
+	float: left;
+	height: 50px;
+	width: 38px;
+}
+
+.castThumb
+{
+	padding-left: 4px;
+	padding-right: 7px;
+	float: left;
+	height: 50px;
+	width: 38px;
+}
+
+.red
+{
+	color: red;
+}
+
+.actorRow
+{
+	height: 44px;
+}
+
+.actorRowWithoutImage
+{
+	height: 24px;
+}
+
+.role
+{
+	padding-left: 10px;
+	font-style: italic;
+}
+.iconThumb
+{
+	width: 100%;
+	margin-bottom: 10px;
+}

@@ -1,0 +1,164 @@
+img
+{
+	border: 0px solid red;
+}
+a
+{
+	color: white;
+	text-decoration: none;
+}
+a:hover
+{
+	text-decoration: underline;
+}
+
+a img:hover
+{
+	text-decoration: none;
+}
+
+.menu
+{
+    background-color: #70716e;
+    width: auto;
+}
+.menu a
+{
+    color: #FFF;
+    font-size: 25px;
+    text-decoration: none;
+    line-height: 1.5;
+}
+#header
+{
+    color: white;
+    font-size: 20px;
+    text-shadow: black 0px 0px 5px;
+}
+.menu tr:nth-child(2n+1) {
+background-color: #70716e;
+}
+.menu tr:nth-child(2n) {
+background-color: #525351;
+}
+.menu tr td
+{
+    padding-right: 20px; 
+}
+#title
+{
+   z-index:1;  
+}
+#rolloverimagediv
+{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    display: block;
+    width: 200px;
+}
+
+body
+{
+	color: white;
+    /*background-color: black;*/
+  	width:95%; 
+  	background-size: 100%;
+    font-family: Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+.cornerside
+{
+	background-image: url('images/corners/side.png');
+	background-repeat:repeat-y;
+	width: 49px;
+}
+.cornertopunder
+{
+	background-image: url('images/corners/top_under.png');
+	background-repeat:repeat-x;
+	height: 50px;
+}
+
+.cornerimage
+{
+	width: 50px;
+	height: 50px;
+}
+
+.transparent
+{
+	background-image: url('images/corners/pixel.png');
+	/*
+	background-color: gray;
+	// Fallback for web browsers that doesn't support RGBa
+	background: rgb(0, 0, 0);
+	// RGBa with 0.6 opacity
+	background: rgba(0, 0, 0, 0.8);
+	// For IE 5.5 - 7
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#CC000000, endColorstr=#CC000000);
+	// For IE 8
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#CC000000, endColorstr=#CC000000)";
+	*/
+	/*opacity: 0.5;
+	filter:alpha(opacity=50);
+	-moz-opacity:0.5;
+	filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+	-khtml-opacity: 0.5;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";*/
+}
+
+#titlePosterColumn
+{
+	width: 30%;
+}
+#titleMainInfoColumn
+{
+	padding-left: 2%;
+	width: 60%;
+}
+#titleIconColumn
+{
+	width: 10%;
+}
+
+#cornerTable
+{
+	width: 90%;
+	margin: 5%;
+}
+
+#cover
+{
+	width: 100%;
+}
+
+.posterthumb
+{
+	width: 8%;
+}
+
+#titlenameheader
+{
+	margin-bottom:0%;	
+}
+
+#basicInfo h3
+{
+	color: white;
+	text-shadow: black 1px 1px 5px;
+	font-variant: small-caps;
+	font-style: bold;
+	padding-right: 50px;
+}
+
+.personphoto
+{
+	padding-left: 20px;
+}
+
+.red
+{
+	color: red;
+}
