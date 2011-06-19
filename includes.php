@@ -1,7 +1,8 @@
 <?php
 	require_once("constants.php");
 	require_once("config_sample.php");
-	require_once("config.php");
+	if(is_file("config.php"))
+		require_once("config.php");
 /* Classes */
 	require_once("classes/ThumbnailProvider.php");
     require_once("classes/RssItem.php");
