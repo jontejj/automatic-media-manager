@@ -370,6 +370,17 @@ class Gui
 		{
 			getSubtitles($_GET['path']);
 		}
+		else if($this->page == 'run')
+		{
+			$files = $this->production->getNonInternetFiles();
+			if(count($files) > 0)
+			{
+				//Watch movie on local computer
+				//TODO: fix this for other operating systems as well
+				$file = str_replace("/", "\\", $files[0]->fullPath());
+				pclose(popen("$file",'r'));
+			}
+		}
 	}
 	function renderTitle($productionId)
 	{
@@ -786,7 +797,8 @@ class Gui
      	$this->out .= '
      		<a href="http://www.imdb.com/title/tt'.$this->production->imdb.'"><img class="iconThumb" src="images/imdb.png"></a><br>
      		<a href="http://thepiratebay.org/search/'.$this->production->title.'"><img class="iconThumb" src="images/tpb.png"></a><br>
-     		<a href="http://www.mrskin.com/search/search?term='.$this->production->title.'"><img class="iconThumb" src="images/mrskin.png"></a><br>';
+     		<a href="http://www.mrskin.com/search/search?term='.$this->production->title.'"><img class="iconThumb" src="images/mrskin.png"></a><br>
+     		<a href="?page=run&title='.$this->production->id.'"><img class="iconThumb" src="images/clapper.png" title="Watch"></a><br>';
      	
      	if($this->production->type == IGNORED_RSSMOVIE)
      		$this->out .= '<a href="?page='.$this->page.'&sub='.$this->sub.'&title='.$this->title.'&manuallyAdd=1" title="Add movie to RSS feed"><img class="iconThumb" src="images/download.png"></a><br>';
