@@ -1345,6 +1345,8 @@ class Gui
 			
 		if(isset($oldvalue))
 			$_GET[$variableName] = $oldvalue;
+		else 
+			unset($_GET[$variableName]);
 		
 		return $link;
 	}
