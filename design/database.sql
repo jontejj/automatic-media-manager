@@ -182,7 +182,7 @@ CREATE TABLE person
 (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT,
         name CHAR(100),
-		bio TINYTEXT NOT NULL,
+		bio TEXT NOT NULL,
 		dob DATE NOT NULL,
 		birthplace CHAR(100),
 		gender INT(1) DEFAULT 0,

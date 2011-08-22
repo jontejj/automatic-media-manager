@@ -181,7 +181,7 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 						&& $production->torrentIMDB != $production->nfoIMDB)
 						{
 							$productionByTorrent = $dbh->getProductionByIMDB($production->torrentIMDB);
-							Logger::missMatchBetweenIMDBlookupAndNFOFile($productionFromDatabase, $productionByTorrent, $stackitem->path.$filename);
+							Logger::missMatchBetweenIMDBlookupAndNFOFile($production, $productionByTorrent, $stackitem->path.$filename);
 						}						
 					}
 					

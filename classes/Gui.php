@@ -1037,6 +1037,19 @@ class Gui
 			else
 			{
 				$person = $dbh->getPersonInfo($this->person, false);
+				if(count($person->photos) > 0)
+				{
+					$this->out .= "<img src='".$person->photos[0]->path."' style='float: left;'/>";
+				}
+				//BIO stuff
+				$this->out .= "<div>
+								<h1>".$person->name."</h1>
+								<br>Born: ".$person->dob." in ".$person->birthplace."
+								<br>Gender: ".(($person->gender == 0) ? "Male" : "Female")."
+								<br>Bio: ".$person->bio."
+								<br>IMDB: <a href='http://www.imdb.com/name/nm".$person->id."'>Link</a>
+								</div><br style='clear: both;'/>";
+				
 				if(count($person->acting) > 0)
 				{
 					$this->out .= "<p>Acting in:</p>";
