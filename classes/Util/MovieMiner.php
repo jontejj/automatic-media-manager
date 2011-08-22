@@ -195,40 +195,13 @@ class MovieMiner
 			$movie->imdb = $suggestion;
 	}
 	
-	public static function getTitleAndYearFromString($movie,$string)
+	public static function getTitleAndYearFromDom($movie,$dom)
 	{
-		$year = 0;
-		//A title could look like this:
-		//Sands of Oblivion (2007) (TV), http://www.imdb.com/title/tt0977663/
-		//or
-		//Smokin' Aces 2: Assassins' Ball (2010/I) (V), http://www.imdb.com/title/tt1319743/
-		//or
-		//Wonder Woman (Video 2009), http://www.imdb.com/title/tt1186373/
-		
-		//Year
-		$yearBeginIndex = strrpos($string,'(');
-		if($yearBeginIndex === false)
-			return;
-		$yearEndIndex = strpos($string,'/',$yearBeginIndex);
-		if($yearEndIndex === false)
-			$yearEndIndex = strpos($string,')',$yearBeginIndex);
-
-			
-		$year = StringUtil::scanint(substr($string,$yearBeginIndex+1),false,0);
-		if(!is_numeric($year))
-		{
-			$yearBeginIndex = strrpos($string,'(',-(strlen($string)-$yearBeginIndex)-1);
-			$yearEndIndex = strpos($string,'/',$yearBeginIndex);
-			if($yearEndIndex === false)
-				$yearEndIndex = strpos($string,')',$yearBeginIndex);
-
-			$year = StringUtil::scanint(substr($string,$yearBeginIndex+1),false,0);
-		}
 		if(is_a($movie,'Movie'))
-			$movie->year = $year;
+			$movie->year = trim($dom->find('a[href^="/year/"]',0)->plaintext);
 			
 		if(!is_a($movie,'Episode'))
-			$movie->title = strip_tags(trim(substr($string,0,$yearBeginIndex-1),"\n"));
+			$movie->title = strip_tags(trim($dom->find('h1[itemprop="name"]',0)->nodetext, "\n"));
 	}
 	
 	public static function getEpisodesFor($tvshow)
@@ -299,8 +272,7 @@ class MovieMiner
 			
 		$dom = str_get_html(implode('',$lines));
 		
-		$titleElement = $dom->find('title',0);
-		MovieMiner::getTitleAndYearFromString($movie,$titleElement->plaintext);
+		MovieMiner::getTitleAndYearFromDom($movie,$dom);
 		
 		//Return if the result is a tvshow and we are looking for a movie
 		//If we have added a movie and the result starts with a " it is a show
