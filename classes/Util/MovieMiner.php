@@ -48,7 +48,8 @@ class MovieMiner
 							$titleline = returnarraykey($lines,"<title>");
 							if($titleline !== false)
 							{
-								MovieMiner::getTitleAndYearFromString($movie,$lines[$titleline]);
+								$dom = str_get_html(implode('',$lines));
+								MovieMiner::getTitleAndYearFromDom($movie,$dom);
 								$title = html_entity_decode($movie->title);
 								$properResult = true;
 								if(is_a($movie,"Movie"))
