@@ -199,8 +199,21 @@ class MovieMiner
 	public static function getTitleAndYearFromDom($movie,$dom)
 	{
 		if(is_a($movie,'Movie'))
-			$movie->year = trim($dom->find('a[href^="/year/"]',0)->plaintext);
-			
+		{
+			$yearElement = $dom->find('a[href^="/year/"]',0);
+			if($yearElement)
+			{
+				$movie->year = trim($yearElement->plaintext);
+			}
+			else
+			{
+				$yearElement = $dom->find('time[itemprop="datePublished"]',0);
+				if($yearElement)
+				{
+					$movie->year = trim($yearElement->plaintext);
+				}
+			}
+		}	
 		if(!is_a($movie,'Episode'))
 			$movie->title = strip_tags(trim($dom->find('h1[itemprop="name"]',0)->nodetext, "\n"));
 	}
@@ -423,30 +436,22 @@ class MovieMiner
 			}
 		}
 		//Rating
-		$ratingElement = $dom->find('span.rating-rating',0);
-		if($ratingElement != null)
+		$ratingElement = $dom->find('span[itemprop="ratingCount"]', 0);
+		if($ratingElement)
 		{
-			$rating = substr($ratingElement->plaintext,0,-3);
-			if(is_numeric($rating))
-			{
-				$movie->rating = $rating;
-				//Only look for number of votes if the rating was found
-				$voteElement = $dom->find('a[href="ratings"]',0);
-				if($voteElement != null)
-				{
-					$votes = substr(str_replace(',','',$voteElement->plaintext),0,-6);
-					if(is_numeric($votes))
-						$movie->votes = $votes;	
-					else
-						Logger::parseError($movie,'Non numeric number of votes');	
-				}
-			}
-			else
-				Logger::parseError($movie,'Non numeric rating');	
+			$movie->rating = $ratingElement->plaintext;
 		}
-		else
-			Logger::parseError($movie,'Ratings not found');
-		
+		else 
+			$movie->rating = 0;
+			
+		$votesElement = $dom->find('span[itemprop="ratingCount"]', 0);
+		if($votesElement)
+		{
+			$movie->votes = str_replace(',','',$votesElement->plaintext);
+		}
+		else 
+			$movie->votes = 0;
+			
 		//Top 250
 		$top250Element = $dom->find('a[href^="http://www.imdb.com/chart/top"]',0);
 		if($top250Element != null)
