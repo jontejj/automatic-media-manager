@@ -436,7 +436,7 @@ class MovieMiner
 			}
 		}
 		//Rating
-		$ratingElement = $dom->find('span[itemprop="ratingCount"]', 0);
+		$ratingElement = $dom->find('span[itemprop="ratingValue"]', 0);
 		if($ratingElement)
 		{
 			$movie->rating = $ratingElement->plaintext;
