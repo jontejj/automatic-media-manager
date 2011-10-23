@@ -12,9 +12,9 @@ echo $movie->toString();
 //die();
 
 //Fix wrong ratings
-$ignored = $dbh->listProductions("production.id", "DESC", 1, IGNORED_RSSMOVIE, "production.rating", "=", 0, false);
-$movies = $dbh->listProductions("production.id", "DESC", 1, MOVIE, "production.rating", "=", 0, false);
-$rss = $dbh->listProductions("production.id", "DESC", 1, RSSMOVIE, "production.rating", "=", 0, false);
+$ignored = $dbh->listProductions("production.id", "DESC", 1, IGNORED_RSSMOVIE, "production.rating", ">", 10, false);
+$movies = $dbh->listProductions("production.id", "DESC", 1, MOVIE, "production.rating", ">", 10, false);
+$rss = $dbh->listProductions("production.id", "DESC", 1, RSSMOVIE, "production.rating", ">", 10, false);
 
 $objects = array_merge($ignored, $movies, $rss);
 
@@ -22,7 +22,7 @@ echo "Fixing: ".count($objects). " movies.";
 foreach($objects as $movie)
 {
 	$m = $dbh->getProduction($movie->id);
-	$m->getImdbInfo();
+	MovieMiner::getBasicInfo($m, true);
 	$dbh->addProduction($m);
 }
 echo "Updated movies, rechecking their goodyness";
