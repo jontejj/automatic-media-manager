@@ -18,8 +18,8 @@ class MovieMiner
 	{
 		if(!$movie->hasProperIMDBNumber())
 		{
-			$lines = FileRetrieve::file("http://www.imdb.com/find?s=tt&q={$movie->getUrlEncodedSearch()}",TITLE_SEARCH); //Hämtar info från imdb
-			Logger::echoText("Fetching imdb id for ".$movie->getDisplayTitle().PHP_EOL);
+			$lines = FileRetrieve::file("http://www.imdb.com/find?s=tt&q={$movie->getUrlEncodedSearch()}",TITLE_SEARCH);
+			Logger::echoText("Fetching imdb id for ".$movie->getDisplayTitle()."(".$movie.filePathForFirstFile().")".PHP_EOL);
 
 			if(returnarraykey($lines,'<b>No Matches.</b>') === false)
 			{

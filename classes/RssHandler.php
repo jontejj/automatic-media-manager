@@ -8,7 +8,7 @@ define("REDOWNLOAD_TORRENT_FILE",5);
 class RssHandler
 {
 	private $ignoredReleases = array('BoxSet','Quadrilogy','Quadrology','Trilogy','Duology','Hexalogy','Collection','Nuked','Movie pack','PACK','PS3','X360',
-										'FRENCH', 'GERMAN','German','WEBSCR');
+										'FRENCH', 'GERMAN','German','WEBSCR', 'KORSUB');
 	private $seperators = array('.','-',',','_','[',']',' ','(',')');
 	/**
 	 * TvTorrents Rss filter
@@ -16,7 +16,7 @@ class RssHandler
     public function rss($feed,$update)
     {
     	Logger::disableEcho();
-        error_reporting(E_ERROR); 
+        error_reporting(E_ERROR);
         $rss = fetch_rss($feed);
         header("Content-type: text/xml");
         echo "<?xml version='1.0' encoding='UTF-8'?>
@@ -27,9 +27,9 @@ class RssHandler
         <description>Torrents</description>
         <language>en-us</language>";
         foreach($rss->items as $item)
-        {                       
+        {
             global $dbh;
-            
+
             $showname = substr($item['summary'],10,strpos($item['summary'],';')-10);
             $str = substr($item['summary'],strpos($item['summary'],'; Season:')+10);
             $season = substr($str,0,strpos($str,';'));
@@ -43,14 +43,14 @@ class RssHandler
             $rssitem = new RssItem($link, $season, $episode, $hd, $date, $showname, $filename);
             if('all' != strtolower($rssitem->episode))   //Vi vill inte ha stora packar med alla avsnitt från en säsong
             {
-                if(!$rssitem->isFetchedWithHd()) //Är objektet inte hämtat i hd kvalitet? 
+                if(!$rssitem->isFetchedWithHd()) //Är objektet inte hämtat i hd kvalitet?
                 {
                     if($rssitem->hd())
                     {
                         $rssitem->removeSDversions();
                         $rssitem->insert();
-                        //Lägg ut objekt i RSS fil 
-                        $rssitem->put();                
+                        //Lägg ut objekt i RSS fil
+                        $rssitem->put();
                     }
                     else
                         $rssitem->insert();
@@ -58,7 +58,7 @@ class RssHandler
                 else if($rssitem->hd())
                 {
                     $rssitem->removeSDversions();
-                    //Lägg ut objekt i RSS fil 
+                    //Lägg ut objekt i RSS fil
                     $rssitem->put();
                 }
             }
@@ -67,14 +67,14 @@ class RssHandler
         $rssitems = $dbh->getMax7DaysOldSDversions();
         foreach($rssitems as $rssitem)
         {
-            //Lägg ut objekt i RSS fil  
+            //Lägg ut objekt i RSS fil
             $rssitem->put();
         }
         echo "</channel></rss>";
         Logger::enableEcho();
         die();
     }
-    
+
     public function mineTL($user, $pass, $update = false)
     {
     	global $dbh;
@@ -84,7 +84,7 @@ class RssHandler
 	    	$alreadyLoggedIn = FileRetrieve::validRememberMeCookie("cookies/torrentleech.txt");
 	    	if(!$alreadyLoggedIn)
 				$this->torrentLeechlogin($user, $pass);
-				
+
 	    	$timeToQuit = false;
 	    	$currentPage = 1;
 	    	while($currentPage < 30 && !$timeToQuit)
@@ -99,25 +99,25 @@ class RssHandler
 					$dom = str_get_html($moviesListing);
 		    	}
 		    	//$dom = file_get_dom("html_layouts/torrentleech.browse.html");
-				
+
 				$torrentRows = $dom->find("table[id=torrenttable] tbody tr");
-				
-				
+
+
 				foreach($torrentRows as $torrentRow)
 				{
 					if(isset($torrentRow->id))
 					{
 						$torrentId = $torrentRow->id;
-						
+
 						//Release date on TL
 						$nameElement = $torrentRow->find("td.name", 0);
 						$date = substr(trim($nameElement->nodetext),13);
-						
+
 						$titleNode = $torrentRow->find('a[href^="/torrent/"]',0);
 						$title = $titleNode->plaintext;
-						
+
 						$pathToStoreTorrentAt = "torrents/TL_web_".$torrentId.".torrent";
-						
+
 						$quickDownloadLinkElement = $torrentRow->find("td.quickdownload a",0);
 						if($quickDownloadLinkElement != null)
 						{
@@ -135,7 +135,7 @@ class RssHandler
     									Logger::logIgnoredRSSMovie($rssMovie, "Multiple IMDB links found in NFO");
     									break;
 									}
-									
+
 									if(!$rssMovie->tooBig)
 									{
 										//Downloads the torrent
@@ -152,19 +152,19 @@ class RssHandler
 				    					}
 				    					$this->handleNewRssMovie($rssMovie);
 									}
-									else 
+									else
 									{
 										$dbh->logFailedRssMovieLink($pathToStoreTorrentAt);
 										Logger::logNotAllowedRSSMovie($rssMovie->toString().": Too big");
 									}
-										
+
 			    					break;
 								case REDOWNLOAD_TORRENT_FILE:
 									unlink($pathToStoreTorrentAt);
 		    						$torrentFile = FileRetrieve::getPageByCurl($downloadURL, "cookies/torrentleech.txt");
 		    						if($torrentFile != "")
 		    							Logger::setFileToString($torrentFile,$pathToStoreTorrentAt);
-		    							
+
 		    						if($this->actionForRssMovie($pathToStoreTorrentAt, $title) == REDOWNLOAD_TORRENT_FILE)
 		    						{
 		    							Logger::echoText("Failed to download torrent file: ".$downloadURL);
@@ -179,32 +179,32 @@ class RssHandler
 					}
 					if($timeToQuit)
 						break;
-				}		
+				}
 				$dom->clear();
 				$currentPage++;
 	    	}
     	}
-		
+
 		$this->printRssMoviesFromDatabase();
 		$this->printRssFooter();
     }
-    
+
     public function torrentLeechLoginRequired($dom)
     {
     	$loginForm = $dom->find('form[action="/user/account/login/"]');
     	return $loginForm != null;
     }
-    
+
     private function torrentLeechlogin($user, $pass)
     {
     	//Creates a session and retrieves the PHP_SESSID
     	FileRetrieve::getPageByCurl("http://www.torrentleech.org/","cookies/torrentleech.txt");
-    	
+
     	$postData = array('username' => $user, 'password' => $pass, 'login' => 'submit', 'remember_me' => 'on');
     	//Logins and saves the cookies for future use
     	FileRetrieve::postAndRetrieve("http://www.torrentleech.org/user/account/login/",$postData,"cookies/torrentleech.txt");
     }
-    
+
     public function rssTPB($feed, $update)
     {
 		$this->printRssHeader();
@@ -216,7 +216,7 @@ class RssHandler
 	        {
 	        	$timeToQuit = false;
 		        foreach($rss->items as $item)
-		        {             
+		        {
 		        	$action = $this->actionForRssMovie($item['link'],$item['title']);
 		        	switch($action)
 					{
@@ -239,7 +239,7 @@ class RssHandler
 		$this->printRssMoviesFromDatabase();
 		$this->printRssFooter();
     }
-    
+
     private function actionForRssMovie($link,$title)
     {
     	//TODO: remove this check
@@ -249,14 +249,14 @@ class RssHandler
     		if($file !== false && returnarraykey($file, "<h1>An error occurred</h1>") !== false)
     			return REDOWNLOAD_TORRENT_FILE;
     	}
-    	
+
     	global $dbh;
-    	$rssMovie = $dbh->getRssMovie($link); 
+    	$rssMovie = $dbh->getRssMovie($link);
         if($rssMovie === false)
         {
         	$rssMovie = $dbh->getFailedRssMovieLink($link);
         	if($rssMovie === false)
-        	{ 
+        	{
         		$allowed = true;
         		//Ignore collections etc.
         	    foreach($this->ignoredReleases as $word)
@@ -287,10 +287,10 @@ class RssHandler
 			    	if(strpos($title, "Trailer",$yearPos) !== false)
 			    		$allowed = false;
 			    }
-			    
+
         		if($allowed && !tvShowInfoFromFullFilePath($link.$title,0))
         			return DOWNLOAD;
-        		else 
+        		else
         		{
         			Logger::logNotAllowedRSSMovie($title);
         			return DISALLOWED;
@@ -299,15 +299,15 @@ class RssHandler
         	else
         		return HAS_FAILED_BEFORE;
         }
-        else 
+        else
         	return EXISTED;
     }
-    
+
     private function printRssHeader()
     {
     	Logger::disableEcho();
     	error_reporting(E_ERROR);
-    	
+
         header("Content-type: text/xml");
         echo "<?xml version='1.0' encoding='UTF-8'?>".PHP_EOL."
         <rss version='2.0'>".PHP_EOL."
@@ -318,13 +318,13 @@ class RssHandler
         <description>Torrents</description>".PHP_EOL."
         <language>en-us</language>".PHP_EOL;
     }
-    
+
     //Also exits the script
     private function printRssFooter()
     {
         echo "</channel>".PHP_EOL."</rss>".PHP_EOL;
     }
-    
+
     private function printRssMoviesFromDatabase()
     {
     	global $dbh;
@@ -332,7 +332,7 @@ class RssHandler
     	$fullHd = $dbh->getlatestFullHDMovies();
         $rssmovies = array_merge($regular,$fullHd);
         foreach($rssmovies as $rssMovie)
-        { 
+        {
         	if(is_a($rssMovie,"RssMovie"))
         	{
         		if(!$rssMovie->looksLikeAGoodMovie())
@@ -361,14 +361,14 @@ class RssHandler
         	}
         }
     }
-    
+
     public function handleNewRssMovie($rssMovie)
     {
     	global $dbh;
-    	
+
     	//Makes sure the Movie gets a nice looking title without searching the interwebs for the title
     	$rssMovie->getTitle();
-    	
+
     	if(!$rssMovie->hasProperIMDBNumber()) //Fall back to an IMDB search
     	{
     		if($rssMovie->getImdbId($rssMovie->filenameExludingFileType) == MULTIPLE_MATCHES)
@@ -378,7 +378,7 @@ class RssHandler
     			return;
     		}
     	}
-    	
+
     	if($rssMovie->hasProperIMDBNumber())
     	{
     		$movie = $dbh->getProductionByIMDB($rssMovie->imdb);
@@ -387,7 +387,7 @@ class RssHandler
     			//Speeds up the filtering of bad movies (low rating)
     			//MovieMiner::getBasicInfo($rssMovie,true);
     			//Fetch some more info about the movie, now that we know that it is of high quality
-    			
+
     			//if(!$rssMovie->haveBasicIMDBinfo)
     			$rssMovie->getImdbInfo("");
 
@@ -401,7 +401,7 @@ class RssHandler
     					if($rssMovie->fullHD())
     					{
     						//if($rssMovie->haveBasicIMDBinfo)
-    						//	$rssMovie->getImdbInfo("");	
+    						//	$rssMovie->getImdbInfo("");
     						//Maybe the new info from IMDB says that it isn't good anymore?
     						//if($rssMovie->looksLikeAGoodMovie())
     						$rssMovie->downloaded = true;
@@ -409,7 +409,7 @@ class RssHandler
     				}
     				if($rssMovie->downloaded == false)
     					$rssMovie->type = IGNORED_RSSMOVIE;
-    					
+
     				$dbh->addProduction($rssMovie);
 	    			$rssMovie->addTorrentFilesToDb();
     			}
@@ -445,7 +445,7 @@ class RssHandler
     	}
     	else
     		$dbh->logFailedRssMovieLink($rssMovie->link);
-    	 
+
     }
 }
 ?>
