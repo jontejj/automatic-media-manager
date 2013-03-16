@@ -8,7 +8,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         var $filename;
         var $path;
         var $timeAdded;
-        
+
         //File specific from Media info
         var $format;               //Matroska
         var $filesize;                  //GB
@@ -27,36 +27,36 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         	$this->productionId = -1;
         	$this->hassubtitle = false;
 	        $this->playcount = 0;
-	        $this->format = "";            
-	        $this->filesize = 0;              
-	        $this->duration = 0;            
-	        $this->videobitrate = 0.0;      
-	        $this->width = 0;              
-	        $this->height = 0;                
-	        $this->ar = "";     
+	        $this->format = "";
+	        $this->filesize = 0;
+	        $this->duration = 0;
+	        $this->videobitrate = 0.0;
+	        $this->width = 0;
+	        $this->height = 0;
+	        $this->ar = "";
 	        $this->writinglibrary = "";
 			$this->timeAdded = date('Y-m-d H:i:s');
-				
+
   			$this->path = $path;
   			$this->filename = $filename;
         }
-        
+
         function hasProperties()
         {
-        	
+
         }
-        
+
         function fullPath()
         {
         	return $this->path.$this->filename;
         }
-        
+
         function fullHD()
         {
         	if($this->width >= 1920)
         		return true;
-        	else 
-        		return false;		
+        	else
+        		return false;
         }
         function regularHD()
         {
@@ -65,20 +65,20 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         	else
         		return false;
         }
-        
+
         function isInternetFile()
         {
         	return (substr($this->path,0,8) == 'internet');
         }
-        
+
         function getMediaInfo()
         {
         	global $movieformats,$acceptableformats,$subtitlesformats, $cfg;
         	$filetype = strtolower(substr($this->filename,strrpos($this->filename,'.')+1));
-        	
+
         	if($this->isInternetFile() || $filetype == 'rar')
         	{
-        		//Some info is given by the release name, 
+        		//Some info is given by the release name,
         		if(stripos($this->path.$this->filename,'1080p') !== false)
         		{
         			$this->width = 1920;
@@ -96,9 +96,9 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         		}
         		//No more info about a internet file can be fetched
         		if($this->isInternetFile())
-        			return;	
+        			return;
         	}
-        	
+
 			$this->hassubtitle = false;
 			$pathWithFileExludingFiletype = substr($this->path.$this->filename,0,strrpos($this->path.$this->filename,'.'));
 			foreach($subtitlesformats as $format)
@@ -107,21 +107,23 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 					$this->hassubtitle = true;
 					break;
 				}
-        	
+
         	$filesize = filesize($this->path.$this->filename);
         	if ( $filesize < 0 )
         		$filesize = -$filesize;
-        	if( 
+        	if(
         		isVideoTsFolder($this->path.$this->filename)
         		||
         		(in_array($filetype,$acceptableformats) && is_readable($this->path.$this->filename) && is_file($this->path.$this->filename) && $filesize > 1000))
         	{
         		$fileToLookAt = $this->path.$this->filename;
-        		
+
         		$dvdfile = isVideoTsFolder($this->path.$this->filename);
         		if($dvdfile !== false)
 	            	$fileToLookAt .= $dvdfile;
-	            exec(realpath(getcwd()."/functions/mediainfo/mediainfo.exe").' "'.$fileToLookAt.'"',$output); 
+
+        		Logger::echoText("Getting mediainfo for ".$fileToLookAt.PHP_EOL);
+	            exec(realpath(getcwd()."/functions/mediainfo/mediainfo.exe").' "'.$fileToLookAt.'"',$output);
 	            $info = array();
 	            foreach($output as $line)
 	            {
@@ -129,14 +131,14 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	                $t = explode(" : ",$line);
 	                if(count($t) > 1)
 	                    $info[] = $t[1];
-	                else 
+	                else
 	                    $info[] = $t[0];
 	            }
 	            //Has subtitle?
 	            if($this->hassubtitle === false)
 	            {
 	            	if(returnarraykey($output,'Text') !== false)
-	            		$this->hassubtitle = true;	
+	            		$this->hassubtitle = true;
 	            }
 	            //Duration
 	            $durationline = returnarraykey($output,'Duration');
@@ -157,7 +159,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	            $formatline = returnarraykey($output,'Format');
 	            if($formatline !== false)
 	            	$this->format = $info[$formatline];
-	            else 
+	            else
 	            	$this->format = "";
 	            //Filesize
 	            $filesizeline = returnarraykey($output,'File size');
@@ -180,18 +182,18 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 			            if(strpos($line,'Kbps') !== false)
 			            {
 			                $line = str_replace(array("Kbps"," "),'',$line);
-			                $this->videobitrate = $line/1024;    
+			                $this->videobitrate = $line/1024;
 			            }
 			            else
 			                $this->videobitrate = substr($line,0,strpos($line,' '));
-			            $this->videobitrate = round($this->videobitrate,2);           
+			            $this->videobitrate = round($this->videobitrate,2);
 		            }
 	            }
 	            //Video width
 	            $widthline = returnarraykey($output,'Width');
 	            if($widthline !== false)
 	            	$this->width = str_replace(array("pixels"," "),'',$info[$widthline]);
-	            	
+
 	            //Video height
 	            $heightline = returnarraykey($output,'Height');
 	            if($heightline !== false)
@@ -200,7 +202,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 	            $arline = returnarraykey($output,'Display aspect ratio');
 	            if($arline !== false)
 	            	$this->ar = $info[$arline];
-	            	
+
 	            //Writing library
 	            $wlline = returnarraykey($output,'Writing library');
 	            if($wlline !== false)
@@ -222,30 +224,30 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 		            $lline = returnarraykey($output,'Title',$audiotrackline);
 		            if($lline !== false)
 		            	$title = $info[$lline];
-		            else 
+		            else
 		            	$title = "";
-		            	
+
 		            //language
 		            $lline = returnarraykey($output,'Language',$audiotrackline);
 		            if($lline !== false)
 		            	$language = $info[$lline];
-		            else 
+		            else
 		            	$language = "";
-	
+
 		            //format
 		            $formatline = returnarraykey($output,'Format',$audiotrackline);
 		            if($formatline !== false)
 		            	$format = $info[$formatline];
 		            else
 		            	$format = "";
-		            
+
 		            //formatinfo
 		            $formatiline = returnarraykey($output,'Format/Info',$audiotrackline);
 		            if($formatiline !== false)
 		            	$formatinfo = $info[$formatiline];
 		            else
 		            	$formatinfo = "";
-	
+
 		            //bitrate
 		            $bitrateline = returnarraykey($output,'bps',$audiotrackline);
 		            if($bitrateline !== false)
@@ -255,7 +257,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 		            }
 		            else
 		            	$bitrate = "";
-		            
+
 	           		//channels
 		            $channelsline = returnarraykey($output,'Channel(s)',$audiotrackline);
 		            if($channelsline !== false)
@@ -265,7 +267,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
 		            }
 		            else
 		            	$channels = "";
-		            $this->audiotracks[] = new AudioTrack($language,$format,$formatinfo,$bitrate,$channels,$title);	
+		            $this->audiotracks[] = new AudioTrack($language,$format,$formatinfo,$bitrate,$channels,$title);
 		            if($multiple)
 		            	$audiotrackline = returnarraykey($output,'Audio #'.(++$nr));
 		            else
@@ -286,7 +288,7 @@ $subtitlesformats = array("srt","sup","sub","SRT","SUP","SUB");
         			$this->width = 1280;
         			$this->height = 720;
         		}
-        		
+
         	    if(stripos($this->filename,'DTS') !== false)
         		{
         			$this->audiotracks[] = new AudioTrack("english","DTS","Digital Theatre System",1500,6,"Assumed audio track by filename");

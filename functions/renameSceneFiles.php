@@ -3,7 +3,7 @@ $reservedwords = array(
 				'720p','720P','1080P','1080i','480p','x264','Bluray','Blu-ray','BluRay',',bluray','HD','BD','HDTV','X360','PS3',
 				'Extended','Directors.Cut','Directors Cut','DirCut','DC','UNCUT','UNRATED','Unrated','LIMITED','LiMiTED','Limited','THEATRICAL',
 				'REPACK','PROPER','RERIP','REAL','DUBBED','SUBBED','INTERNAL','iNTERNAL','HDre','REMASTERED','Special','Edition',
-				'BDr','BDRE','eng','swe','German','ENG','SWE','MULTi','MULTiSUBS','multisub','Box',
+				'BDr','BDRE','eng','swe','German','ENG','SWE','MULTi','MULTiSUBS','multisub',
 				'DTS','DTSMA',
 				'SiDE A','SiDE B','Side B','SIDE B','DVD-r','DVD-R','DVD5','DL','NTSC','PAL',
 				'XViD','XviD','Xvid', 'TELESYNC','BRRip','R5','DVDRip','BDRiP','STV');
@@ -12,7 +12,7 @@ $seperatorsAsString = ' .-,_[]()';
 function stripReleaseInfoFromTitle($title, $getYear = false)
 {
 	global $reservedwords,$acceptableformats,$seperators,$seperatorsAsString;
-	
+
 	//If there is a date in the beginning strip it from the rest
 	$y = substr($title,0,4);
 	$m = substr($title,5,2);
@@ -21,15 +21,15 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 		$movie = substr($title,11);
 	else
 		$movie = $title;
- 
-    
+
+
     $filetype = strtolower(substr($title,strrpos($title,'.')+1));
     if(!in_array($filetype,$acceptableformats))
     	$filetype = "";
     else
     	$filetype = '.'.$filetype;
-    	
-    
+
+
     //More readable without dots and underscores
     //Replacing dots followed by any other character than a space
     $dotsreplaced = "";
@@ -86,10 +86,10 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 		    				else if($nextSpace < $nextDot || $nextDot === false)
 		    					$dotsreplaced .= '.';
 	    				}
-	    			}	
+	    			}
 	    			$lastDot = $i;
 	    		}
-				else 
+				else
 					$dotsreplaced .= ' ';
     		}
     	}
@@ -133,9 +133,9 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
     		$yearStart = $potentialYearStart;
     	}
     }
-    
+
     $movie  = str_replace('_',' ',$dotsreplaced);
-    	
+
 	$places = array();
     foreach($reservedwords as $index => $word)
     {
@@ -147,7 +147,7 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
     		{
     			if(!in_array(substr($movie,$places[$index]-1,1),$seperators))
     				$places[$index] = false;
-    			
+
 		    	if(strlen($movie) > $places[$index]+strlen($word)+1)
 		    	{
 			    	if(!in_array(substr($movie,$places[$index]+strlen($word),1),$seperators))
@@ -164,21 +164,21 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
     	if(($lowest == -1 || $place < $lowest) && $place !== false)
     		$lowest = $place;
     }
-    	
+
     if($year > 1800)
     {
     	$offset = $yearStart;
-    	
+
     	if($lowest != -1)
     		$offset = min($lowest,$yearStart);
-    	
+
     	$movie = substr($movie,0,$offset);
     	//Replaces shitty characters in the end of the string
     	//if(substr_count($movie,'.') > 1)
     	//	$movie = rtrim($movie,$seperatorsAsString);
     }
     else
-    {    		
+    {
 	    //Check for a year in the end of the filename
 	    $year = trim(substr($movie,-6),$seperatorsAsString);
 	    if(is_numeric($year) && $year > 1800)
@@ -190,7 +190,7 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 	    {
     		//Strips away the scene stuff
     		$movie = substr($movie,0,$lowest);
-    			
+
 	    	$releaseinfo = substr($title,$lowest);
 	    	$parts = explode('.',$releaseinfo);
 	    	$year = 0;
@@ -199,7 +199,7 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 	    		if(is_numeric($part) && $part > 1800)
 	    		{
 	    			$year = $part;
-	    			break;	
+	    			break;
 	    		}
 	    	}
 	    }
@@ -211,7 +211,7 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 		else
 			return $year;
 	}
-	else 
+	else
 	{
 		//Log to keep track of how well the script performs
 		Logger::titleParsed($title, trim($movie,' '), $year);
@@ -220,7 +220,7 @@ function stripReleaseInfoFromTitle($title, $getYear = false)
 }
 function hasYearInTitle($title)
 {
-	return stripReleaseInfoFromTitle($title,true);	
+	return stripReleaseInfoFromTitle($title,true);
 }
 
 function renameSceneFiles($dir)
@@ -233,7 +233,7 @@ function renameSceneFiles($dir)
 		unset($movies[$currentDirIndex]);
 	if($parentDirIndex !== FALSE)
 		unset($movies[$parentDirIndex]);
-				
+
     foreach($movies as $movie)
     {
     	if(is_file($dir.$movie))
@@ -244,7 +244,7 @@ function renameSceneFiles($dir)
 	    		$movie = stripReleaseInfoFromTitle($movie);
 	    		if(!is_dir($dir.'renamed/'))
 	    			mkdir($dir.'renamed/',0777);
-	    			
+
 	    		if(!is_file($dir.'renamed/'.$movie))
 	    			rename($dir.$old,$dir.'renamed/'.$movie);
 	    		else

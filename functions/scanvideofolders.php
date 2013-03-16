@@ -1,19 +1,19 @@
 <?php
 //Test commit
-$movieformats = array("mkv","avi","ts","wmv","divx","m2ts","mpg","mp4");
+$movieformats = array("mkv","avi","ts","wmv","divx","m2ts","mpg","mp4", "mov");
 $acceptableformats = array("iso", "rar","nrg","img");
 
 foreach($movieformats as $format)
 	$acceptableformats [] = $format;
-	
+
 $dvdFileNames = array('VIDEO_TS.VOB','VIDEO_TS.vob','VIDEO_TS.ifo','VIDEO_TS.IFO');
 
 $seperators = array(' ','.','-',',','_','[',']');
 $stack = array();
 function removeEmptyFolders($folder)
-{	
+{
 	$dir = DirectoryUtil::scandir($folder);
-		
+
 	if(count($dir) == 0)
 	{
 		echo "removing".$folder."<br>";
@@ -25,13 +25,13 @@ function removeEmptyFolders($folder)
 		{
 			if(is_dir($folder.$filerecord))
 				removeEmptyFolders($folder.$filerecord.'/');
-		}	
+		}
 	}
 }
 function calcFileSize($size,$folder)
-{	
+{
 	$dir = DirectoryUtil::scandir($folder);
-		
+
 	foreach($dir as $filerecord)
 	{
 		if(is_dir($folder.$filerecord))
@@ -59,9 +59,9 @@ function removeProductionsWithoutFiles()
 			if(!isVideoTsFolder($file) && !is_file($file))
 			{
 				$path = substr($file,0,strrpos($file,'/')+1);
-				$filename = substr($file,strlen($path)); 
+				$filename = substr($file,strlen($path));
 				$dbh->deleteProduction($path,$filename);
-				$html .= '<tr><td>'.$path.$filename.'</td></tr>';	
+				$html .= '<tr><td>'.$path.$filename.'</td></tr>';
 			}
 		}
 	}
@@ -126,10 +126,10 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 			$pathWithFileExludingFiletype = substr($fullpath,0,strrpos($fullpath,'.'));
 			$production->getTitle();
 			//$production->lookForIMDBInNfoFile($pathWithFileExludingFiletype);
-			
+
 			$html .= '<tr><td>'.$stackitem->path.$filename.'<br><div class="red">'.$production->getDisplayTitle().'</div></tr>';
 			*/
-								
+
 			if(!$onlyNewFiles || ($onlyNewFiles && !isset($filesInDB[$stackitem->path.$filename])))
 			{
 				if(isset($addedMap[$stackitem->path.$stackitem->name]))
@@ -142,7 +142,7 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 				}
 				else
 				{
-					$pathWithFileExludingFiletype = substr($stackitem->path.$filename,0,strrpos($stackitem->path.$filename,'.'));								
+					$pathWithFileExludingFiletype = substr($stackitem->path.$filename,0,strrpos($stackitem->path.$filename,'.'));
 					if($checkIMDBLinksInNFOFiles)
 					{
 						$test = new Movie($stackitem->path, $filename, $stackitem->name,true);
@@ -157,12 +157,12 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 							if($test->hasProperIMDBNumber() && $test->imdb != $nfoImdb)
 							{
 								Logger::nfoFileWithBadLink($nfoLocation);
-								$html .= '<tr><td>'.$pathWithFileExludingFiletype.'</td></tr>';	
+								$html .= '<tr><td>'.$pathWithFileExludingFiletype.'</td></tr>';
 							}
 	        			}
 	        			break;
 					}
-						
+
 					if(isset($filesInDB[$stackitem->path.$filename]))
 					{
 						//An update for an old movie
@@ -174,17 +174,17 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 						$production->getImdbId($pathWithFileExludingFiletype);
 						//Is there already a movie with the same imdb but another path?
 						$productionFromDatabase = $dbh->getProductionByIMDB($production->imdb);
-						
+
 						//If the Title parser made IMDB return a wrong match, then the nfo file could tell us the correct one
-						if(MovieMiner::isProperIMDBNumber($production->nfoIMDB) 
-						&& MovieMiner::isProperIMDBNumber($production->torrentIMDB) 
+						if(MovieMiner::isProperIMDBNumber($production->nfoIMDB)
+						&& MovieMiner::isProperIMDBNumber($production->torrentIMDB)
 						&& $production->torrentIMDB != $production->nfoIMDB)
 						{
 							$productionByTorrent = $dbh->getProductionByIMDB($production->torrentIMDB);
 							Logger::missMatchBetweenIMDBlookupAndNFOFile($production, $productionByTorrent, $stackitem->path.$filename);
-						}						
+						}
 					}
-					
+
 					if($productionFromDatabase !== false)
 					{
 						Logger::echoText("The movie for: ".$filename." was already in the database.".PHP_EOL);
@@ -193,9 +193,9 @@ function scanVideoFolders($onlyNewFiles = true,$checkIMDBLinksInNFOFiles = false
 							$productionFromDatabase->getImdbInfo($pathWithFileExludingFiletype);
 							$dbh->addProduction($productionFromDatabase);
 						}
-						else 
+						else
 							Logger::echoText("But the file: {$filename} was new.".PHP_EOL);
-							
+
 						$file = new FFile($stackitem->path, $filename);
 						$file->getMediaInfo();
 						$file->productionId = $productionFromDatabase->id;
@@ -232,11 +232,11 @@ function stackAndRenameMovies($folder)
 			//Makes sure the folder path ends with a slash
 			if(strrpos($folder,'/') != strlen($folder)-1)
 				$folder .= '/';
-				
+
 			$dir = DirectoryUtil::scandir($folder);
 			//If it was a successful scan folder
 			if($dir !== false)
-			{					
+			{
 				foreach($dir as $filerecord)
 				{
 					if((isVideoTsFolder($folder.$filerecord) || is_file($folder.$filerecord)) && !tvShowInfoFromFullFilePath($folder.$filerecord))
@@ -246,7 +246,7 @@ function stackAndRenameMovies($folder)
 						if(is_dir($folder.$filerecord.'/'))
 							stackAndRenameMovies($folder.$filerecord.'/');
 					}
-				}	
+				}
 			}
 		}
 		else if(is_file($folder) && !tvShowInfoFromFullFilePath($folder))
@@ -267,16 +267,16 @@ function stackFile($filerecord,$folder)
 			$withoutfiletype = substr($filerecord,0,strrpos($filerecord,'.'));
 		else
 			$withoutfiletype = $filerecord;
-			
+
 		//Movie file or folder?
 		$filetype = strtolower(substr($filerecord,strrpos($filerecord,'.')+1));
 		global $acceptableformats,$stack;
 		if(in_array($filetype,$acceptableformats) || is_dir($folder.$filerecord) || isVideoTsFolder($folder.$filerecord))
 		{
 			$stackIndex = count($stack);
-			
-			//If the filerecord contains a dot or space, 
-			//extract last part, 
+
+			//If the filerecord contains a dot or space,
+			//extract last part,
 			//remove cd/dvd etc,
 			//check if the remainder is numeric
 			$char = ' ';
@@ -287,11 +287,11 @@ function stackFile($filerecord,$folder)
 			$fileending = str_replace(array('cd','dvd','part','episode','e',' '),'',$fileending);
 			if(is_numeric($fileending)) //Stackable
 				$name = substr($withoutfiletype,0,strrpos($withoutfiletype,$char));
-			
+
 			//Default non-stackable files gets set
 			if(!isset($name))
 				$name = $withoutfiletype;
-			
+
 			//Check stack for the name
 			foreach($stack as $index => $stackItem)
 			{
@@ -301,7 +301,7 @@ function stackFile($filerecord,$folder)
 					break;
 				}
 			}
-			
+
 			//If there isn't a stackitem at stackindex create one
 			if(!isset($stack[$stackIndex]))
 				$stack[$stackIndex] = new StackableFile($name,$folder,array($filerecord));
@@ -335,7 +335,7 @@ function isSampleVideoFile($filename)
     	{
     		if(!in_array(substr($filename,$sampleIndex-1,1),$seperators))
     			return false;
-    		
+
     		//The seperator to the right
 	    	if(strlen($filename) > $sampleIndex+6)
 	    	{
