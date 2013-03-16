@@ -20,9 +20,9 @@ class MovieMiner
 		{
 			$lines = FileRetrieve::file("http://www.imdb.com/find?s=tt&q={$movie->getUrlEncodedSearch()}",TITLE_SEARCH); //Hämtar info från imdb
 			Logger::echoText("Fetching imdb id for ".$movie->getDisplayTitle().PHP_EOL);
-			
+
 			if(returnarraykey($lines,'<b>No Matches.</b>') === false)
-			{				
+			{
 				$searchPage = returnarraykey($lines," Search</title>");
 				//We got redirected, it was probably a really good hit
 				if($searchPage === false)
@@ -72,7 +72,7 @@ class MovieMiner
 								}
 							}
 						}
-					}				
+					}
 				}
 				else if($onlyAcceptDirectHit === false)
 				{
@@ -91,9 +91,9 @@ class MovieMiner
 						if($partialStart !== false && $partialStart < $approxStart)
 							$approxFirst = false;
 					}
-					
+
 					$resultSections = array("Popular Titles", "Titles (Exact Matches)");
-						
+
 					if($approxFirst)
 					{
 						$resultSections[] = "Titles (Approx Matches)";
@@ -104,7 +104,7 @@ class MovieMiner
 						$resultSections[] = "Titles (Partial Matches)";
 						$resultSections[] = "Titles (Approx Matches)";
 					}
-					
+
 					foreach($resultSections as $index => $section)
 					{
 						//HTML for the different sections
@@ -136,7 +136,7 @@ class MovieMiner
 			Logger::logNoIMDBNumberFoundForProduction($movie);
 		}
 	}
-	
+
 	private static function setIMDBNumberFromBestResult($movie,$titleinfo)
 	{
 		$suggestion = false;
@@ -147,17 +147,17 @@ class MovieMiner
 			//There may be a expand/collapse thingy with two images in it
 			if($nrOfImages == 1 || $nrOfImages == 3)
 				$image = 1;
-			
+
 			$id = explode('<a href="',$t,2);
 			if(count($id) > 0)
 			{
 				$titlename = explode("</a>",$id[1],3);
-				$year = StringUtil::scanint($titlename[1+$image],false); 
+				$year = StringUtil::scanint($titlename[1+$image],false);
 				$isMiniSeries = (strpos($titlename[1+$image],'mini-series') !== false);
 				//The filename may have told us if the result's year is correct
 				if(!is_a($movie,"Movie") || $movie->year === false || $movie->year == $year)
 				{
-					
+
 					if($suggestion === false)// || $image == 1) //A movie with a thumb could be prioritized
 					{
 						$properSuggestion = true;
@@ -175,18 +175,18 @@ class MovieMiner
 							if($title[0] != '"')
 								$properSuggestion = false;
 						}
-						
+
 						if(strpos($titlename[1+$image],'/II)') !== false)
 							$properSuggestion = false;
 						else if(strpos($titlename[1+$image],'/III)') !== false)
 							$properSuggestion = false;
 						else if(strpos($titlename[1+$image],') (VG)') !== false)
 							$properSuggestion = false;
-							
+
 						if($properSuggestion)
 							$suggestion = StringUtil::scanint($id[1],false); //Suggested IMDB
 					}
-						
+
 					//if($image == 1)
 					//	break;
 				}
@@ -195,7 +195,7 @@ class MovieMiner
 		if($suggestion !== false)
 			$movie->imdb = $suggestion;
 	}
-	
+
 	public static function getTitleAndYearFromDom($movie,$dom)
 	{
 		if(is_a($movie,'Movie'))
@@ -213,16 +213,19 @@ class MovieMiner
 					$movie->year = trim($yearElement->plaintext);
 				}
 			}
-		}	
+		}
 		if(!is_a($movie,'Episode'))
-			$movie->title = strip_tags(trim($dom->find('h1[itemprop="name"]',0)->nodetext, "\n"));
+		{
+			$title = trim($dom->find('span[itemprop="name"]',0)->nodetext, "\n");
+			$movie->title = strip_tags($title);
+		}
 	}
-	
+
 	public static function getEpisodesFor($tvshow)
 	{
 		//FileRetrieve::copy("http://www.thetvdb.com/api/".$cfg['TVDB_API_KEY']."/mirrors.xml",'mirrors.xml');
-		
-		$episodeInfo = FileRetrieve::file("http://www.imdb.com/title/tt{$tvshow->imdb}/episodes",ALL_EPISODES_INFO_IMDB,0,true); 
+
+		$episodeInfo = FileRetrieve::file("http://www.imdb.com/title/tt{$tvshow->imdb}/episodes",ALL_EPISODES_INFO_IMDB,0,true);
 		$tvshow->tempTvshow = new Tvshow();
 		$dom = str_get_html($episodeInfo);
 		$seasonSections = $dom->find('div[class^="season-filter-all"]');
@@ -238,7 +241,7 @@ class MovieMiner
 					$text = $info->plaintext;
 					$episode->season = StringUtil::scanint($text,false,0);
 					$episode->episode = StringUtil::scanint($text,false,1);
-					
+
 					$link = $info->find('a',0);
 					if($link != null)
 					{
@@ -246,13 +249,13 @@ class MovieMiner
 						$episode->imdb = StringUtil::scanint($href);
 						$episode->title = $link->plaintext;
 					}
-					
+
 					$plotTextElement = $e->innertext;
 					$plotStart = strpos($plotTextElement,'<br>')+6;
 					$plotEnd = strpos($plotTextElement,'</td>',$plotStart);
-					
+
 					$episode->plot = substr($plotTextElement,$plotStart,$plotEnd-$plotStart);
-					
+
 					$airDateElement = $e->find('strong',0);
 					if($airDateElement != null)
 					{
@@ -268,9 +271,9 @@ class MovieMiner
 		}
 		$dom->clear();
 	}
-	
+
 	public static function getBasicInfo($movie, $basic = false)
-	{   
+	{
 		Logger::echoText("Fetching imdb info for ".$movie->getDisplayTitle().PHP_EOL);
 		//If there only was a title when we searced, the page for that movie will be cached
 		if(isset($movie->imdbPage))
@@ -280,14 +283,14 @@ class MovieMiner
 
 			unset($movie->imdbPage);
 		}
-		//Läser in filmens huvudsida från imdb
+		//Reads the movie's mainpage on imdb
 		if(!isset($lines))
-			$lines = FileRetrieve::file("http://www.imdb.com/title/tt{$movie->imdb}/",TITLE_IMDB_MAIN_PAGE); //Hämtar info från imdb
-			
+			$lines = FileRetrieve::file("http://www.imdb.com/title/tt{$movie->imdb}/",TITLE_IMDB_MAIN_PAGE);
+
 		$dom = str_get_html(implode('',$lines));
-		
+
 		MovieMiner::getTitleAndYearFromDom($movie,$dom);
-		
+
 		//Return if the result is a tvshow and we are looking for a movie
 		//If we have added a movie and the result starts with a " it is a show
 		if(is_a($movie, "RssMovie"))
@@ -300,7 +303,7 @@ class MovieMiner
 				$dom->clear();
 				return;
 			}
-			else 
+			else
 				$movie->badResult = false;
 		}
 		$articles = $dom->find('div.article');
@@ -313,7 +316,7 @@ class MovieMiner
 				if($infoHeadline != null)
 				{
 					$parent = $infoHeadline->parent;
-					
+
 					if($infoHeadline->plaintext == 'Country:')
 						$movie->country = $infoHeadline->next_sibling()->plaintext;
 					else if($infoHeadline->plaintext == 'Language:')
@@ -327,7 +330,7 @@ class MovieMiner
 						$start = strpos($runtime,':');
 						if($start !== false)
 							$start += 1;
-						$movie->runtime = substr($runtime,$start,strpos($runtime,' min',$start)-$start).' min';					
+						$movie->runtime = substr($runtime,$start,strpos($runtime,' min',$start)-$start).' min';
 					}
 					else if(strpos($infoHeadline->plaintext,'MPAA') !== false)
 						$movie->mpaa = trim($parent->nodetext);
@@ -339,7 +342,7 @@ class MovieMiner
 							//TODO: handle multiple studios, for instance check 21 grams
 							//foreach($companyElements as $companyElement)
 							//	$movie->genres[] = $genreElement->plaintext;
-							$movie->studio = $companyElements[0]->plaintext;	
+							$movie->studio = $companyElements[0]->plaintext;
 						}
 					}
 					else if($infoHeadline->plaintext == 'Taglines:')
@@ -441,17 +444,17 @@ class MovieMiner
 		{
 			$movie->rating = $ratingElement->plaintext;
 		}
-		else 
+		else
 			$movie->rating = 0;
-			
+
 		$votesElement = $dom->find('span[itemprop="ratingCount"]', 0);
 		if($votesElement)
 		{
 			$movie->votes = str_replace(',','',$votesElement->plaintext);
 		}
-		else 
+		else
 			$movie->votes = 0;
-			
+
 		//Top 250
 		$top250Element = $dom->find('a[href^="http://www.imdb.com/chart/top"]',0);
 		if($top250Element != null)
@@ -464,13 +467,13 @@ class MovieMiner
 			else if($kind == 'Top')
 				$movie->top250 = $number;
 			else if($kind == 'Bottom')
-				$movie->top250 = -$number;	
+				$movie->top250 = -$number;
 		}
-		
+
 		//IMDB poster
 		$posterElement = $dom->find('td[id=img_primary]',0);
 		if($posterElement != null)
-		{	
+		{
 			$link = $posterElement->first_child();
 			if($link != null && isset($link->href))
 			{
@@ -491,22 +494,22 @@ class MovieMiner
 					else
 						$movie->photos[] = $localDest;
 				}
-				else 
+				else
 					Logger::parseError($movie, "Poster page doesn't have a primary image");
-					
+
 				$posterDom->clear();
 			}
-			else 
+			else
 				Logger::echoText("No IMDB poster found: ".$movie->title."<br>");
 		}
-		else 
+		else
 			Logger::parseError($movie, "No table element for the IMDB primary poster found on the main page");
-		
+
 		$dom->clear();
 	}
 
 	public static function getKeywords($movie)
-	{	    
+	{
 		Logger::echoText("Getting keywords for: ".$movie->getDisplayTitle().PHP_EOL);
 		$keywordFile = FileRetrieve::file('http://www.imdb.com/title/tt'.$movie->imdb.'/keywords',IMDB_KEYWORDS,0,true);
 		if($keywordFile !== false)
@@ -560,7 +563,7 @@ class MovieMiner
 				{
 					$test = substr($linkElement->outertext,17);
 					$actor->id = StringUtil::scanint2($test);
-					
+
 					$roleElement = $actorElement->find('td.char',0);
 					if($roleElement != null)
 					{
@@ -578,15 +581,15 @@ class MovieMiner
 	{
 		global $dbh;
 		if($dbh->getPerson($person->id) === false)
-		{			
+		{
 			if(is_numeric($person->id))
-			{	
+			{
 				//BIO stuff
 				$actorbio = FileRetrieve::file("http://www.imdb.com/name/nm".$person->id.'/bio');
 				$bioline = returnarraykey($actorbio,'<h5>Mini Biography</h5>');
 				if($bioline !== false)
 					$person->bio = strip_tags($actorbio[$bioline+1]);
-	
+
 				$dobline = returnarraykey($actorbio,'<h5>Date of Birth</h5>');
 				if($dobline !== false)
 				{
@@ -598,7 +601,7 @@ class MovieMiner
 					$person->dob = $year.'-'.$month.'-'.$day;
 					$person->birthplace = substr($actorbio[$dobline],strrpos($actorbio[$dobline],'>',-4)+1,-5);
 				}
-					
+
 				//Gender
 				$gendersearch = FileRetrieve::file('http://www.imdb.com/search/name?gender=female&name='.$person->getUrlEncodedName());
 				//If the person is in the search results, it is a female
@@ -606,7 +609,7 @@ class MovieMiner
 					$person->gender = "1";
 				else
 					$person->gender = "0";
-					
+
 				//Avatar
 				MovieMiner::getPersonPhoto($person);
 			}
@@ -730,7 +733,7 @@ class MovieMiner
 	{
 		global $cfg;
 		Logger::echoText("Getting posters for: ".$movie->getDisplayTitle().PHP_EOL);
-		
+
 		$paddedIMDBid = str_pad($movie->imdb,7,'0',STR_PAD_LEFT);
 		$tmdbJSONResponse = FileRetrieve::file("http://api.themoviedb.org/2.1/Movie.getImages/en/json/".$cfg['TMDB_API_KEY']."/tt".$paddedIMDBid,0,true);
 		if(is_array($tmdbJSONResponse))
@@ -821,9 +824,9 @@ class MovieMiner
 							{
 								$line = substr($line,strpos($line,'<img src="')+10);
 								$line = substr($line,0,strpos($line,'"'));
-									
+
 								$imagepath = 'images/posters/'.$movie->imdb.'.jpg';
-									
+
 								//Firt we try with a big picture
 								//If tvshow /tv/ instead of /{year}/ before $line
 								if(!is_file($imagepath))
@@ -863,7 +866,7 @@ class MovieMiner
 			}
 		}
 	}
-	
+
 	public static function isProperIMDBNumber($imdb)
 	{
 		return (isset($imdb) && is_numeric($imdb) && $imdb > 0);
