@@ -306,7 +306,19 @@ class MovieMiner
 			else
 				$movie->badResult = false;
 		}
-		$articles = $dom->find('div.article');
+		//Plot/Storyline
+		$movie->plot = $dom->find('p[itemprop="description"]', 0)->nodetext;
+
+		//Runtime
+		$runtime = trim($dom->find('time[itemprop="duration"]', 0)->nodetext);
+		//Handles different runtimes in different countries
+		//Example: http://www.imdb.com/title/tt0393597/
+		//http://www.imdb.com/title/tt0167261/
+		$start = strpos($runtime,':');
+		if($start !== false)
+			$start += 1;
+		$movie->runtime = substr($runtime,$start,strpos($runtime,' min',$start)-$start).' min';
+
 		//Movie details
 		foreach($articles as $article)
 		{
@@ -321,17 +333,6 @@ class MovieMiner
 						$movie->country = $infoHeadline->next_sibling()->plaintext;
 					else if($infoHeadline->plaintext == 'Language:')
 						$movie->language = $infoHeadline->next_sibling()->plaintext;
-					else if($infoHeadline->plaintext == 'Runtime:')
-					{
-						$runtime = trim($parent->nodetext);
-						//Handles different runtimes in different countries
-						//Example: http://www.imdb.com/title/tt0393597/
-						//http://www.imdb.com/title/tt0167261/
-						$start = strpos($runtime,':');
-						if($start !== false)
-							$start += 1;
-						$movie->runtime = substr($runtime,$start,strpos($runtime,' min',$start)-$start).' min';
-					}
 					else if(strpos($infoHeadline->plaintext,'MPAA') !== false)
 						$movie->mpaa = trim($parent->nodetext);
 					else if($infoHeadline->plaintext == 'Production Co:')
@@ -388,52 +389,6 @@ class MovieMiner
 								MovieMiner::getPersonInfo($writer);
 							$movie->writers[] = $writer;
 						}
-					}
-				}
-			}
-			//Plot/Storyline
-			$posterHeadlines = $article->find('h2');
-			foreach($posterHeadlines as $infoHeadline)
-			{
-				if($infoHeadline->plaintext == 'Storyline')
-				{
-					$plot = trim($infoHeadline->next_sibling()->nodetext);
-					$plotEnd = StringUtil::backwardStrpos($plot, "\n");
-					if($plotEnd !== false)
-						$movie->plot = trim(substr($plot,0,$plotEnd));
-					else
-						$movie->plot = trim($plot);
-					//We do not want unfinished sentences
-					if(substr($movie->plot,-3,3) == '...')
-					{
-						$plotLines = FileRetrieve::file("http://www.imdb.com/title/tt{$movie->imdb}/plotsummary",IMDB_PLOT_RETRIEVE);
-						$plots = array();
-						$plotDom = str_get_html(implode('',$plotLines));
-						$plotElements = $plotDom->find('p.plotpar');
-						if(is_array($plotElements))
-						{
-							foreach($plotElements as $plotElement)
-							{
-								$plot = $plotElement->innertext;
-								//Removes the trailing written by text
-								$plots [] = strip_tags(substr($plot,0,strpos($plot,'<i>')));
-							}
-							//Lengthy plot descriptions are dull!
-							//Select the shortest one
-							$plotWithLeastCharacters = 0;
-							$selectedPlotLength = strlen($plots[0]);
-							for($i = 1;$i< count($plots);$i++)
-							{
-								$length = strlen($plots[$i]);
-								if($length < $selectedPlotLength)
-								{
-									$plotWithLeastCharacters = $i;
-									$selectedPlotLength = $length;
-								}
-							}
-							$movie->plot = $plots[$plotWithLeastCharacters];
-						}
-						$plotDom->clear();
 					}
 				}
 			}
